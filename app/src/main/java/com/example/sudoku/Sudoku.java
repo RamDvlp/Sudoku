@@ -5,9 +5,9 @@ import java.util.Collections;
 import java.util.Random;
 public class Sudoku {
 	
-	private static final int EASYLEVEL = 17;
-	private static final int MEDIUMLEVEL = 16;
-	private static final int HARDLEVEL = 15;
+	private static final int EASYLEVEL = 25;
+	private static final int MEDIUMLEVEL = 23;
+	private static final int HARDLEVEL = 21;
 	
 	private int[][] sudoku;
 	private int size;

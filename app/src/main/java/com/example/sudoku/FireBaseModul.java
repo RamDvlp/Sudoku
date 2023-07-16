@@ -15,6 +15,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.auth.User;
 import com.google.firebase.storage.FirebaseStorage;
@@ -23,9 +24,11 @@ import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class FireBaseModul {
 
@@ -35,6 +38,8 @@ public class FireBaseModul {
 
 
     private Map<String, String> userdata;// = new HashMap<>();
+
+    private Completion_Time_Callback completion_time_callback;
 
 
     // Create a storage reference from our app
@@ -79,6 +84,8 @@ public class FireBaseModul {
             @Override
             public void onSuccess(Void unused) {
                 Log.d("ASD", "uploaded");
+                completion_time_callback.setUserScore("And you " +userdata.get("Name") + " finished the sudoku in " + userdata.get("Time"));
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -92,17 +99,38 @@ public class FireBaseModul {
 
     }
 
+    public void setCompletion_time_callback(Completion_Time_Callback completion_time_callback){
+        this.completion_time_callback = completion_time_callback;
+    }
+
+    private String messege;
+
     public void readUserData(){
 
+        String userID;
+        userID = mySP.getSP().readID();
+        if(userID.equals(""))
+            return;
 
         firestore.collection("users")
-                .document(userdata.get("ID"))
+                .document(userID)
                 .get()
                 .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 userdata.put("Time",documentSnapshot.getString("Time"));
                 userdata.put("Name",documentSnapshot.getString("Name"));
+                messege = "And you " +userdata.get("Name") + " finished the sudoku in " + userdata.get("Time");
+
+                if(userdata.get("Time") != null){
+                    completion_time_callback.setUserScore(messege);
+
+                }else {
+                    messege = "No Score Set YET!";
+                    completion_time_callback.setUserScore(messege);
+
+
+                }
 
                 Log.d("ASD", "read from server " + userdata.get("Name"));
                 Log.d("ASD", "read from server " + userdata.get("Time"));
@@ -118,24 +146,31 @@ public class FireBaseModul {
 
     }
 
-    public void readAllUsers(){
 
+    // Define the starting point for the query (null for the initial request)
+    private DocumentSnapshot lastVisibleDocument = null;
+
+    public ArrayList<String> readAllUsers(){
+
+
+        String userID;
+        userID = mySP.getSP().readID();
+
+        ArrayList<String> returnedData = new ArrayList<>();
         // Specify the collection reference
         CollectionReference collectionRef = firestore.collection("users");
 
-// Define the batch size
+        // Define the batch size
         int batchSize = 10;
 
-// Define the starting point for the query (null for the initial request)
-        DocumentSnapshot lastVisibleDocument = null;
-
-// Perform the query to retrieve the batch of documents
+        // Perform the query to retrieve the batch of documents
         Query query = collectionRef.orderBy("Time", Query.Direction.ASCENDING).limit(batchSize);
         if (lastVisibleDocument != null) {
             query = query.startAfter(lastVisibleDocument);
         }
 
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+
 
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -149,26 +184,81 @@ public class FireBaseModul {
                             // Access the data of each document
                             Map<String, Object> data = document.getData();
                             // Process the data as needed
+                            userdata.put("ID", String.valueOf(data.get("ID")));
+                            userdata.put("Name", String.valueOf(data.get("Name")));
+                            userdata.put("Time", String.valueOf(data.get("Time")));
+
+                            //pretty print preperation
+                            int lenspace = userdata.get("Name").length();
+                            String space = "";
+                            while(20 - lenspace >0){
+                                space += " ";
+                                lenspace++;
+                            }
+
+
+                            returnedData.add(returnedData.size()+1 + " | " +userdata.get("Name") + space + userdata.get("Time"));
+//
+//                            if(userdata.get("ID").equals(userID)){
+//                                completion_time_callback.setUserScore(messege);
+//                            }
+
                         }
 
                         // Check if there are more documents to fetch
                         if (documents.size() >= batchSize) {
                             // Set the last visible document for the next batch
-                         //   lastVisibleDocument = documents.get(documents.size() - 1);
+                            lastVisibleDocument = documents.get(documents.size() - 1);
                             // Trigger the next batch retrieval (e.g., by user request)
                             // You can call a method or update UI elements to fetch the next batch
                         } else {
                             // Handle the case when all documents have been retrieved
+                            //completion_time_callback.setUserScore("No Score Set YET!");
+
+                            //return;
                         }
                     } else {
                         // Handle the case when there are no documents in the collection
+                        //return;
                     }
                 } else {
                     // Handle any errors that occurred during the query
+                    //return;
                 }
             }
         });
 
 
+        return returnedData;
     }
+//
+//    public ArrayList<String> getAllUsers(){
+//
+//
+//        ArrayList<String> returnedData = new ArrayList<>();
+//        // Specify the collection reference
+//        CollectionReference collectionRef = firestore.collection("users");
+//
+//// Define the batch size
+//        int batchSize = 10;
+//
+//// Perfo
+//
+//        collectionRef.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+//            @Override
+//            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+//                if (task.isSuccessful()) {
+//                    for (QueryDocumentSnapshot document : task.getResult()) {
+//                        String name = document.getString("Name");
+//                        String time = document.getString("Time");
+//                        String uid = document.getId();
+//                        returnedData.add(name + "   " + time);
+//                        //DocumentReference uidRef = firestore.collection("users").document(uid);
+//                    }
+//
+//        }
+//            }
+//        });
+//        return returnedData;
+//    }
 }

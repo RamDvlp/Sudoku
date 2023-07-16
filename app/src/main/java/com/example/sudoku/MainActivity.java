@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,9 +25,7 @@ public class MainActivity extends AppCompatActivity {
 
     private Button startGame_btn;
 
-    public MainActivity() {
-    }
-
+    private Button leaderBoard_btn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,22 +40,34 @@ public class MainActivity extends AppCompatActivity {
 
         difficulty_pageView.setCurrentItem(1);
 
+        leaderBoard_btn = findViewById(R.id.main_BTN_leaderBoard);
+        leaderBoard_btn.setOnClickListener(v -> openLeaderBoard());
 
         startGame_btn = findViewById(R.id.main_BTN_startGame);
         startGame_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 startgame();
-                //Log.d("ASD", "" + difficulty_pageView.getCurrentItem());
-
             }
         });
 
 
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                TimeScoreListFragment.getListItems();
+
+            }
+        });
+        thread.start();
 
 
 
+    }
+
+    private void openLeaderBoard() {
+        Intent intent = new Intent(MainActivity.this, LeaderBoard.class);
+        startActivity(intent);
     }
 
     @Override

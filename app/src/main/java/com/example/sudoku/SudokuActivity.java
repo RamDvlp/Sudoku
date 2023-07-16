@@ -114,9 +114,12 @@ public class SudokuActivity extends AppCompatActivity {
     }
 
     private void stopTimer() {
-        timer.cancel();
-        timer.purge();
-        timer = null;
+        if(timer != null){
+            timer.cancel();
+            timer.purge();
+            timer = null;
+        }
+
     }
 
     private void startTimer() {
@@ -200,8 +203,10 @@ public class SudokuActivity extends AppCompatActivity {
 
     }
 
+
     private void gameOver() {
         stopTimer();
+
 
         userID = mySP.getSP().readID();
         if(userID.equals("")){
@@ -222,6 +227,13 @@ public class SudokuActivity extends AppCompatActivity {
 
         FireBaseModul.getFireBaseModul().uploadUser(lc);
 
+
+
+
+
+       //FireBaseModul.getFireBaseModul().readAllUsers();
+
+        Toast.makeText(this, "Game Over!", Toast.LENGTH_SHORT).show();
         //TODO - ask user if new game or go to leaderboard
         //for now, just go leaderboard
         finish();
