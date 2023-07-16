@@ -11,6 +11,9 @@
         android:layout_height="wrap_content"
         android:textSize="24sp"
         android:textColor="@color/white"
-        android:text="jgfj"/>
+        android:text="jgfj"
+        android:transitionName="11"/>
+
+
 
 </LinearLayout>

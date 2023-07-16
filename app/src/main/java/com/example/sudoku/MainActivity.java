@@ -2,18 +2,17 @@ package com.example.sudoku;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.Arrays;
@@ -23,7 +22,11 @@ public class MainActivity extends AppCompatActivity {
 
     private ViewPager2 difficulty_pageView;
 
-    private String chosenDifficulty;
+    private Button startGame_btn;
+
+    public MainActivity() {
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,9 +39,49 @@ public class MainActivity extends AppCompatActivity {
         difficulty_pageView.setAdapter(adapter);
         //difficulty_pageView.setCurrentItem(adapter.getInitialItem(), false);
 
+        difficulty_pageView.setCurrentItem(1);
+
+
+        startGame_btn = findViewById(R.id.main_BTN_startGame);
+        startGame_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                startgame();
+                //Log.d("ASD", "" + difficulty_pageView.getCurrentItem());
+
+            }
+        });
+
+
+
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        choseName();
+    }
+
+    private void choseName(){
+        if(!mySP.getSP().readNickName().equals("")){
+            return;
+        }
+
+        Intent intent = new Intent(MainActivity.this, NickNamePick.class);
+        //intent.putExtra("Difficulty", difficulty_pageView.getCurrentItem());
+        startActivity(intent);
     }
 
 
+    private void startgame() {
+        Intent intent = new Intent(MainActivity.this, SudokuActivity.class);
+        intent.putExtra("Difficulty", difficulty_pageView.getCurrentItem());
+        startActivity(intent);
+
+    }
 
 
     /*
@@ -47,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private static class OptionPagerAdapter extends RecyclerView.Adapter<OptionPagerAdapter.OptionViewHolder> {
 
-        private List<String> optionTexts = Arrays.asList("Easy", "Medium", "Hard");
+        private List<String> optionTexts = Arrays.asList(" < Easy > ", " < Medium > ", " < Hard > ");
 
         private Context context;
 
@@ -67,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull OptionViewHolder holder, int position) {
             String optionText = optionTexts.get(position);
             holder.optionTextView.setText(optionText);
+
+
         }
 
         @Override
