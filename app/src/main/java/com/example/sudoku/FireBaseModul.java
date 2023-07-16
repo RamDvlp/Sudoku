@@ -84,7 +84,7 @@ public class FireBaseModul {
             @Override
             public void onSuccess(Void unused) {
                 Log.d("ASD", "uploaded");
-                completion_time_callback.setUserScore("And you " +userdata.get("Name") + " finished the sudoku in " + userdata.get("Time"));
+                //completion_time_callback.setUserScore("And you " +userdata.get("Name") + " finished the sudoku in " + userdata.get("Time"));
 
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -188,20 +188,10 @@ public class FireBaseModul {
                             userdata.put("Name", String.valueOf(data.get("Name")));
                             userdata.put("Time", String.valueOf(data.get("Time")));
 
-                            //pretty print preperation
-                            int lenspace = userdata.get("Name").length();
-                            String space = "";
-                            while(20 - lenspace >0){
-                                space += " ";
-                                lenspace++;
-                            }
 
 
-                            returnedData.add(returnedData.size()+1 + " | " +userdata.get("Name") + space + userdata.get("Time"));
-//
-//                            if(userdata.get("ID").equals(userID)){
-//                                completion_time_callback.setUserScore(messege);
-//                            }
+                            returnedData.add(returnedData.size()+1 + " | " +userdata.get("Name") + "         " + userdata.get("Time"));
+
 
                         }
 
